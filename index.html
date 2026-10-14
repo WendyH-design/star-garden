@@ -1,0 +1,2208 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>星際植物艙：研究生的璀璨花園</title>
+  <style>
+    :root {
+      --bg-space-dark: #080614;
+      --bg-space-mid: #150a28;
+      --bg-space-purple: #221040;
+      --card-bg: rgba(26, 18, 54, 0.78);
+      --card-border: rgba(165, 140, 235, 0.28);
+      --card-border-glow: rgba(192, 160, 255, 0.65);
+      --text-main: #f5f3ff;
+      --text-sub: #b8abd6;
+      --accent-star: #ffd15c;
+      --accent-dust: #9ef3ff;
+      --accent-green: #5eead4;
+      --accent-rose: #f472b6;
+      --accent-danger: #fb7185;
+      --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: var(--font-stack);
+      background-color: var(--bg-space-dark);
+      background: radial-gradient(circle at 50% 12%, #26114a 0%, #140929 45%, #080614 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* 星空背景與流星 */
+    .star-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background-image: 
+        radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 150px 80px, #ffd15c, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 280px 220px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 400px 120px, #9ef3ff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 580px 320px, #f472b6, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 750px 180px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 980px 90px, #c084fc, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 1200px 280px, #ffd15c, rgba(0,0,0,0));
+      background-repeat: repeat;
+      background-size: 500px 500px;
+      opacity: 0.85;
+    }
+
+    .shooting-star {
+      position: fixed;
+      top: 12%;
+      left: 82%;
+      width: 130px;
+      height: 2px;
+      background: linear-gradient(90deg, #ffffff, rgba(255, 255, 255, 0));
+      transform: rotate(-35deg);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 0;
+      animation: shoot 8s infinite ease-in-out;
+    }
+
+    @keyframes shoot {
+      0% { transform: translate(0, 0) rotate(-35deg); opacity: 0; }
+      2% { opacity: 1; }
+      5% { transform: translate(-380px, 260px) rotate(-35deg); opacity: 0; }
+      100% { transform: translate(-380px, 260px) rotate(-35deg); opacity: 0; }
+    }
+
+    /* 頂部導覽列 */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(12, 8, 28, 0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 16px 28px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-title {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .brand-title h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #ffffff;
+      line-height: 1.3;
+    }
+    .brand-title p {
+      font-size: 0.88rem;
+      color: var(--text-sub);
+      margin-top: 4px;
+      line-height: 1.25;
+      letter-spacing: 0.3px;
+    }
+
+    .header-stats {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.09);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 7px 16px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .stat-badge.stardust-badge {
+      color: var(--accent-dust);
+      border-color: rgba(158, 243, 255, 0.45);
+    }
+    .stat-badge.star-badge {
+      color: var(--accent-star);
+      border-color: rgba(255, 209, 92, 0.45);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+
+    /* 按鈕樣式：強制文字水平不換行 */
+    .btn-icon {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+      white-space: nowrap; /* 禁止中文字自動折行 */
+      flex-shrink: 0;
+    }
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: var(--card-border-glow);
+      transform: translateY(-1px);
+    }
+    .btn-icon.active {
+      background: rgba(168, 85, 247, 0.38);
+      border-color: #c084fc;
+      color: #fff;
+    }
+
+    /* 允許音樂按鈕在極端窄螢幕下換行顯示 */
+    #btnToggleBgm {
+      white-space: normal;
+      text-align: center;
+      line-height: 1.15;
+    }
+
+    /* 主架構容器 */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 26px;
+      min-height: calc(100vh - 88px);
+    }
+
+    /* 左側任務控制欄 */
+    .task-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      gap: 14px;
+      height: fit-content;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-create {
+      width: 100%;
+      background: linear-gradient(135deg, #6366f1, #9333ea);
+      color: #fff;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(147, 51, 234, 0.35);
+    }
+    .btn-create:hover:not(:disabled) {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+    .btn-create:disabled {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-sub);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      max-height: 320px;
+      padding-right: 4px;
+    }
+    .task-list::-webkit-scrollbar {
+      width: 4px;
+    }
+    .task-list::-webkit-scrollbar-thumb {
+      background: var(--card-border);
+      border-radius: 4px;
+    }
+
+    .task-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      transition: all 0.2s ease;
+    }
+    .task-card:hover {
+      border-color: var(--card-border-glow);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .task-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .task-slot-tag {
+      font-size: 0.74rem;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-sub);
+    }
+    .task-category-tag {
+      font-size: 0.74rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    .cat-reading { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+    .cat-writing { background: rgba(192, 132, 252, 0.2); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.3); }
+    .cat-experiment { background: rgba(45, 212, 191, 0.2); color: #2dd4bf; border: 1px solid rgba(45, 212, 191, 0.3); }
+    .cat-others { background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+
+    .task-title {
+      font-size: 0.96rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .task-progress-box {
+      margin-bottom: 10px;
+    }
+    .task-progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #a855f7);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    .progress-bar-fill.mature {
+      background: linear-gradient(90deg, #f472b6, #fbbf24);
+    }
+
+    .task-controls {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .btn-step {
+      background: rgba(94, 234, 212, 0.15);
+      border: 1px solid rgba(94, 234, 212, 0.45);
+      color: var(--accent-green);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-step:hover {
+      background: rgba(94, 234, 212, 0.28);
+      transform: translateY(-1px);
+    }
+    .btn-harvest-task {
+      background: rgba(244, 114, 182, 0.2);
+      border: 1px solid rgba(244, 114, 182, 0.6);
+      color: var(--accent-rose);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+      white-space: nowrap;
+      animation: pulse-border 1.5s infinite;
+    }
+    .btn-delete-task {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-sub);
+      padding: 5px 9px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-delete-task:hover {
+      color: var(--accent-danger);
+      border-color: var(--accent-danger);
+    }
+
+    /* 左側常駐吉祥物專區 */
+    .left-mascot-container {
+      background: rgba(18, 12, 40, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+    .mascot-bubble {
+      background: rgba(30, 20, 62, 0.95);
+      border: 1px solid var(--accent-star);
+      border-radius: 12px;
+      padding: 9px 13px;
+      font-size: 0.84rem;
+      color: #fff;
+      width: 100%;
+      text-align: center;
+      line-height: 1.45;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .mascot-svg-wrap {
+      width: 95px;
+      height: 95px;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .mascot-svg-wrap:hover {
+      transform: scale(1.1) rotate(3deg);
+    }
+
+    /* 左下角星圖卡片 */
+    .left-constellation-card {
+      background: rgba(22, 14, 46, 0.7);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .constellation-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .constellation-name {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--accent-star);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .btn-switch-constellation {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: var(--text-sub);
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-switch-constellation:hover {
+      color: #fff;
+      border-color: var(--card-border-glow);
+    }
+    .constellation-svg-wrap {
+      width: 105px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+
+    .task-footer-summary {
+      padding-top: 10px;
+      border-top: 1px solid var(--card-border);
+      font-size: 0.84rem;
+      color: var(--text-sub);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    /* 右側星際植物艙：垂直置中佈局 */
+    .greenhouse-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      height: 100%;
+    }
+
+    /* 溫室栽培台：6 個槽位自然置中展開 */
+    .greenhouse-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, minmax(240px, 1fr));
+      gap: 18px;
+      height: 100%;
+      align-content: center;
+    }
+
+    .plant-slot {
+      background: var(--card-bg);
+      border: 1px dashed var(--card-border);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.25s ease;
+      overflow: hidden;
+      padding: 12px 10px 16px 10px;
+    }
+    .plant-slot:hover {
+      border-color: var(--card-border-glow);
+      background: rgba(35, 24, 70, 0.85);
+      transform: translateY(-2px);
+    }
+
+    .slot-index {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      font-size: 0.76rem;
+      color: var(--text-sub);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 7px;
+      border-radius: 6px;
+      z-index: 2;
+      white-space: nowrap;
+    }
+
+    .slot-stage-tag {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      z-index: 2;
+      white-space: nowrap;
+    }
+
+    .slot-display-stage {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-top: 12px;
+    }
+
+    .plant-svg-container, .empty-soil-svg {
+      width: 115px;
+      height: 115px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .plant-svg-container svg, .empty-soil-svg svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .plant-slot.mature {
+      border-style: solid;
+      border-color: rgba(255, 209, 92, 0.7);
+      box-shadow: 0 0 22px rgba(255, 209, 92, 0.25);
+    }
+    .plant-slot.mature .plant-svg-container {
+      animation: float-gentle 2.5s infinite ease-in-out;
+    }
+
+    .slot-info-box {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: 4px;
+      min-height: 48px;
+    }
+    .slot-title {
+      font-size: 0.98rem;
+      font-weight: 600;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90%;
+      line-height: 1.4;
+    }
+    .slot-progress-text {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      line-height: 1.35;
+      margin-top: 2px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* 全螢幕外太空飄散星塵 */
+    .space-flying-dust {
+      position: fixed;
+      pointer-events: none;
+      border-radius: 50%;
+      z-index: 9999;
+      will-change: transform, opacity;
+      animation: fly-to-deep-space var(--duration, 1.4s) cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
+    }
+
+    @keyframes fly-to-deep-space {
+      0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 1;
+      }
+      40% {
+        opacity: 0.95;
+      }
+      100% {
+        transform: translate(var(--dx), var(--dy)) scale(0.1) rotate(var(--rot, 360deg));
+        opacity: 0;
+      }
+    }
+
+    /* 局部採收彈跳粒子 */
+    .harvest-particle {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      animation: harvest-pop 0.85s ease-out forwards;
+      z-index: 10;
+    }
+
+    @keyframes harvest-pop {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+    }
+
+    /* 動畫 */
+    @keyframes float-gentle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 0 0 0 rgba(244, 114, 182, 0); }
+      50% { box-shadow: 0 0 12px rgba(244, 114, 182, 0.45); }
+    }
+    @keyframes plant-shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-5px); }
+      40% { transform: translateX(5px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    .shake {
+      animation: plant-shake 0.4s ease;
+    }
+
+    /* 彈窗樣式 */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(6, 4, 16, 0.75);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      background: #170f30;
+      border: 1px solid var(--card-border-glow);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      padding: 24px;
+      box-shadow: 0 16px 42px rgba(0, 0, 0, 0.7);
+      transform: scale(0.95);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-backdrop.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .modal-header h3 {
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-close {
+      background: transparent;
+      border: none;
+      color: var(--text-sub);
+      font-size: 1.35rem;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+    }
+    .btn-close:hover {
+      color: #fff;
+    }
+
+    /* 表單元件 */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 11px 13px;
+      color: #fff;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .form-input:focus {
+      border-color: var(--accent-dust);
+    }
+    .form-input.error {
+      border-color: var(--accent-danger);
+      animation: plant-shake 0.3s;
+    }
+
+    .radio-pill-group {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .radio-pill {
+      display: block;
+      cursor: pointer;
+    }
+    .radio-pill input {
+      display: none;
+    }
+    .pill-card {
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      text-align: center;
+      font-size: 0.82rem;
+      background: rgba(255, 255, 255, 0.04);
+      transition: all 0.2s;
+    }
+    .radio-pill input:checked + .pill-card {
+      border-color: var(--accent-dust);
+      background: rgba(158, 243, 255, 0.15);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      border: none;
+      color: #fff;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.98rem;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .btn-submit:hover {
+      filter: brightness(1.1);
+    }
+
+    /* 衣櫥卡片樣式 */
+    .wardrobe-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+    }
+    .wardrobe-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-sub);
+      font-size: 0.88rem;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    .wardrobe-tab-btn.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+      font-weight: 600;
+    }
+
+    .item-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .item-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+    }
+    .item-card.equipped {
+      border-color: var(--accent-green);
+      background: rgba(94, 234, 212, 0.09);
+    }
+    .item-card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .item-card-btn {
+      margin-top: 4px;
+      width: 100%;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .item-card-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+    .item-card-btn.buy-btn {
+      background: rgba(255, 209, 92, 0.15);
+      border-color: var(--accent-star);
+      color: var(--accent-star);
+    }
+
+    /* 倉儲圖鑑卡片 */
+    .archive-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .archive-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .archive-plant-icon {
+      width: 54px;
+      height: 54px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .archive-info-box {
+      flex-grow: 1;
+      text-align: right;
+    }
+    .archive-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 2px;
+      white-space: nowrap;
+    }
+    .archive-count {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--accent-dust);
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    /* RWD 響應式佈局：針對手機介面防文字折行進行優化 */
+    @media (max-width: 960px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      .greenhouse-grid {
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 210px);
+      }
+      .greenhouse-panel {
+        order: -1;
+      }
+      .left-mascot-container {
+        flex-direction: row;
+        justify-content: space-around;
+      }
+      .mascot-bubble {
+        max-width: 220px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      header {
+        padding: 10px 12px;
+        gap: 10px;
+      }
+      .brand-title h1 {
+        font-size: 1.15rem;
+      }
+      .brand-title p {
+        font-size: 0.78rem;
+      }
+      .header-stats {
+        gap: 6px;
+      }
+      .stat-badge {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+      }
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+        gap: 4px;
+      }
+      .btn-icon {
+        padding: 6px 8px;
+        font-size: 0.84rem;
+        gap: 3px;
+        flex: 1; /* 手機上按鈕平均分布 */
+      }
+      main {
+        padding: 10px;
+        gap: 14px;
+      }
+      .greenhouse-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 195px);
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 星空背景與流星 -->
+  <div class="star-bg"></div>
+  <div class="shooting-star"></div>
+
+  <!-- 頂部導覽列 -->
+  <header>
+    <div class="brand-title">
+      <h1>星際植物艙：研究生的璀璨花園</h1>
+      <p>「把今天完成的小任務，種成明天看得見的星光。」</p>
+    </div>
+
+    <div class="header-stats">
+      <div class="stat-badge stardust-badge" title="採收獲得的星塵貨幣">
+        <span>✨ 星塵:</span> <span id="headerStardust">0</span>
+      </div>
+      <div class="stat-badge star-badge" title="今日完成步驟累積的星光">
+        <span id="headerStarStatus">⭐ 今日星光: 0/3 (累計 0 步)</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-icon" id="btnToggleBgm" title="播放/暫停抒情星空八音盒">🎵 音樂: 關</button>
+      <button class="btn-icon" id="btnOpenArchive">📦 倉儲</button>
+      <button class="btn-icon" id="btnOpenWardrobe">👗 衣櫥</button>
+      <button class="btn-icon" id="btnOpenSettings">⚙️ 設定</button>
+    </div>
+  </header>
+
+  <!-- 主版面 -->
+  <main>
+    <!-- 左欄：今日研究任務、吉祥物與左下角星圖 -->
+    <section class="task-panel">
+      <div class="panel-header">
+        <h2>📝 今日研究任務</h2>
+        <span style="font-size: 0.82rem; color: var(--text-sub);" id="taskCounterText">0/6 進行中</span>
+      </div>
+
+      <button class="btn-create" id="btnCreateTask">＋ 建立新研究任務</button>
+
+      <div class="task-list" id="taskListContainer">
+        <!-- 任務清單由 JS 動態渲染 -->
+      </div>
+
+      <!-- 左側常駐吉祥物 -->
+      <div class="left-mascot-container">
+        <div class="mascot-bubble" id="mascotBubble" title="點擊換一句能量小語！">
+          歡迎來到星際植物艙！今天有什麼小進度想種下來嗎？
+        </div>
+        <div class="mascot-svg-wrap" id="mascotSvgWrap" title="點擊小動物獲得鼓勵！">
+          <!-- 吉祥物由 JS 動態繪製 -->
+        </div>
+      </div>
+
+      <!-- 左下角星圖專區 -->
+      <div class="left-constellation-card">
+        <div class="constellation-info">
+          <div class="constellation-name">
+            <span id="constellationTitle">小兔子座 🐰</span>
+            <button class="btn-switch-constellation" id="btnSwitchConstellation" title="切換其他可愛星座">🎲 換星座</button>
+          </div>
+          <div style="font-size: 0.74rem; color: var(--text-sub);" id="constellationSubtitle">每推進 1 次任務，點亮 1 顆星光</div>
+        </div>
+        <div class="constellation-svg-wrap" id="constellationSvgContainer">
+          <!-- 3點連線星圖 SVG -->
+        </div>
+      </div>
+
+      <div class="task-footer-summary">
+        <span>今日已完成採收: <strong id="todayCompletedCountText" style="color: var(--accent-dust);">0</strong> 項</span>
+        <span style="font-size: 0.76rem; opacity: 0.85;">今日進度不歸零 🌱</span>
+      </div>
+    </section>
+
+    <!-- 右欄：星際植物艙（完全置中展開） -->
+    <section class="greenhouse-panel">
+      <div class="greenhouse-grid" id="greenhouseGrid">
+        <!-- 6 個 Slot 由 JS 動態渲染 -->
+      </div>
+    </section>
+  </main>
+
+  <!-- 彈窗：建立新任務 -->
+  <div class="modal-backdrop" id="modalCreateTask">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🌱 播種新研究任務</h3>
+        <button class="btn-close" data-close="modalCreateTask">&times;</button>
+      </div>
+      <form id="formCreateTask">
+        <div class="form-group">
+          <label class="form-label">研究任務名稱</label>
+          <input type="text" id="inputTaskTitle" class="form-input" placeholder="例：閱讀 2 篇 GNN 文獻、寫 Introduction..." maxlength="30">
+          <div id="titleErrorTip" style="font-size: 0.75rem; color: var(--accent-danger); margin-top: 4px; display: none;">請輸入任務名稱喔！</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">任務類別（對應星際植物）</label>
+          <div class="radio-pill-group">
+            <label class="radio-pill">
+              <input type="radio" name="taskCategory" value="reading" checked>
+              <div class="pill-card">💎 文獻閱讀<br><span style="font-size: 0.68rem; color: #38bdf8;">水晶星葉草</span></div>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="taskCategory" value="writing">
+              <div class="pill-card">🌙 論文寫作<br><span style="font-size: 0.68rem; color: #c084fc;">墨夜月光蔓</span></div>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="taskCategory" value="experiment">
+              <div class="pill-card">⚡ 研究實驗<br><span style="font-size: 0.68rem; color: #2dd4bf;">脈衝星雲蕈</span></div>
+            </label>
+            <label class="radio-pill">
+              <input type="radio" name="taskCategory" value="others">
+              <div class="pill-card">☀️ 其他事項<br><span style="font-size: 0.68rem; color: #fbbf24;">太陽耀斑葵</span></div>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">預計需完成步數: <strong id="stepCountDisplay" style="color: var(--accent-dust);">2</strong> 次</label>
+          <input type="range" id="inputTaskSteps" min="1" max="5" value="2" style="width: 100%; accent-color: #a855f7; cursor: pointer;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-sub); margin-top: 2px;">
+            <span>1次 (快速)</span>
+            <span>2次</span>
+            <span>3次 (推薦)</span>
+            <span>4次</span>
+            <span>5次 (深度研讀)</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">種入植物艙 ✨</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 彈窗：太空倉儲 -->
+  <div class="modal-backdrop" id="modalArchive">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📦 太空成果倉儲</h3>
+        <button class="btn-close" data-close="modalArchive">&times;</button>
+      </div>
+      <p style="font-size: 0.82rem; color: var(--text-sub); margin-bottom: 14px;">在浩瀚星途中，所有微小成果都化作了閃耀的植物標本：</p>
+      <div class="archive-grid" id="archiveContentGrid">
+        <!-- 倉儲圖鑑由 JS 填充 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 彈窗：太空小動物衣櫥 -->
+  <div class="modal-backdrop" id="modalWardrobe">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3>👗 太空小動物衣櫥</h3>
+        <button class="btn-close" data-close="modalWardrobe">&times;</button>
+      </div>
+      
+      <div class="wardrobe-tabs">
+        <button class="wardrobe-tab-btn active" data-tab="animal">角色夥伴</button>
+        <button class="wardrobe-tab-btn" data-tab="hat">頭部裝飾</button>
+        <button class="wardrobe-tab-btn" data-tab="item">配件與手環</button>
+      </div>
+
+      <div class="item-grid" id="wardrobeItemsContainer">
+        <!-- 衣櫥內容由 JS 填充 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 彈窗：設定與重置 -->
+  <div class="modal-backdrop" id="modalSettings">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>⚙️ 花園設定</h3>
+        <button class="btn-close" data-close="modalSettings">&times;</button>
+      </div>
+      <p style="font-size: 0.88rem; line-height: 1.5; color: var(--text-sub); margin-bottom: 20px;">
+        本系統所有資料皆安全保存於您的瀏覽器 LocalStorage 中，關閉網頁不會丟失。<br>
+        若您需要清空所有進度重來，可以使用下方的「重設花園」按鈕。
+      </p>
+
+      <button class="btn-submit" id="btnResetAllData" style="background: var(--accent-danger);">
+        ⚠️ 重置所有花園資料
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. 狀態與常數資料定義
+       ========================================================================== */
+    const STORAGE_KEY = 'astro_garden_state';
+
+    const ENCOURAGEMENTS = [
+      "今天也完成了一點點，已經很棒了！",
+      "你的星光又增加了！✨",
+      "文獻看不懂先深呼吸，喝口水再繼續吧～",
+      "這顆植物正在努力吸收你的智慧呢！",
+      "慢慢走也是在往前進喔！",
+      "太棒了！為你的研究靈魂注入能量！🌱",
+      "今天的璀璨星空都是你點亮的！",
+      "先休息一下，這片宇宙隨時等你回來。"
+    ];
+
+    const CONSTELLATIONS = [
+      {
+        name: "小兔子座 🐰",
+        points: [[20, 75], [50, 25], [80, 65]],
+        lines: [[0, 1], [1, 2], [2, 0]]
+      },
+      {
+        name: "太空熊熊座 🐻",
+        points: [[25, 30], [50, 70], [75, 30]],
+        lines: [[0, 1], [1, 2]]
+      },
+      {
+        name: "研究生博士帽座 🎓",
+        points: [[20, 45], [50, 20], [80, 45]],
+        lines: [[0, 1], [1, 2], [0, 2]]
+      },
+      {
+        name: "實驗燒杯座 🧪",
+        points: [[30, 25], [50, 75], [70, 25]],
+        lines: [[0, 1], [1, 2], [2, 0]]
+      }
+    ];
+
+    const defaultState = {
+      lastLoginDate: getTodayDateString(),
+      stardust: 0,
+      todayCompletedCount: 0,
+      todayStarCount: 0,
+      activeConstellationIndex: 0,
+      avatar: {
+        animal: "rabbit",
+        hat: "none",
+        item: "none"
+      },
+      unlockedItems: ["hat_none", "item_none"],
+      storageArchive: {
+        reading: 0,
+        writing: 0,
+        experiment: 0,
+        others: 0
+      },
+      slots: [null, null, null, null, null, null]
+    };
+
+    let state = loadState();
+
+    /* ==========================================================================
+       2. 工具函式與 LocalStorage 管理
+       ========================================================================== */
+    function getTodayDateString() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { ...defaultState };
+        const parsed = JSON.parse(raw);
+        
+        const today = getTodayDateString();
+        if (parsed.lastLoginDate !== today) {
+          parsed.todayCompletedCount = 0;
+          parsed.todayStarCount = 0;
+          parsed.activeConstellationIndex = Math.floor(Math.random() * CONSTELLATIONS.length);
+          parsed.lastLoginDate = today;
+        }
+        return parsed;
+      } catch (e) {
+        console.error("載入狀態失敗，重置為預設", e);
+        return { ...defaultState };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      render();
+    }
+
+    /* ==========================================================================
+       3. 純 SVG 模組：對齊置中的培養皿與植物
+       ========================================================================== */
+    function getEmptyDishSVG() {
+      return `
+        <svg viewBox="0 0 100 100">
+          <path d="M22 83 Q22 24 50 16 Q78 24 78 83 Z" fill="rgba(158, 243, 255, 0.05)" stroke="rgba(158, 243, 255, 0.3)" stroke-width="1.5" stroke-dasharray="3,3"/>
+          <ellipse cx="50" cy="16" rx="5" ry="3" fill="#9ef3ff" opacity="0.6"/>
+          
+          <ellipse cx="50" cy="86" rx="35" ry="9" fill="#1b1236" stroke="rgba(165, 140, 235, 0.45)" stroke-width="1.8"/>
+          <ellipse cx="50" cy="84" rx="28" ry="6.5" fill="#2d1c54"/>
+          
+          <ellipse cx="50" cy="83" rx="22" ry="4.5" fill="#0f0924"/>
+          <circle cx="42" cy="83" r="1.5" fill="#ffd15c" opacity="0.8"/>
+          <circle cx="56" cy="83" r="1.2" fill="#9ef3ff" opacity="0.85"/>
+          <circle cx="49" cy="82.5" r="1" fill="#f472b6" opacity="0.7"/>
+        </svg>
+      `;
+    }
+
+    function getPlantPotSVG() {
+      return `
+        <path d="M22 83 Q50 16 78 83" fill="none" stroke="rgba(158, 243, 255, 0.16)" stroke-width="1.5" stroke-dasharray="3,3" />
+        <ellipse cx="50" cy="86" rx="35" ry="9" fill="#1b1236" stroke="rgba(165, 140, 235, 0.45)" stroke-width="1.8"/>
+        <ellipse cx="50" cy="84" rx="28" ry="6.5" fill="#2d1c54"/>
+        <ellipse cx="50" cy="83" rx="22" ry="4.5" fill="#0f0924"/>
+        <circle cx="42" cy="83" r="1.5" fill="#ffd15c" opacity="0.8"/>
+        <circle cx="56" cy="83" r="1.2" fill="#9ef3ff" opacity="0.85"/>
+      `;
+    }
+
+    function getPlantSVG(category, stepPercent) {
+      const potSoil = getPlantPotSVG();
+
+      if (stepPercent === 0) {
+        return `
+          <svg viewBox="0 0 100 100">
+            ${potSoil}
+            <circle cx="50" cy="74" r="7.5" fill="#ffd15c" filter="drop-shadow(0 0 8px #ffd15c)">
+              <animate attributeName="r" values="6.5;8.5;6.5" dur="2s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="50" cy="74" r="3.2" fill="#ffffff" />
+          </svg>
+        `;
+      }
+
+      if (stepPercent < 50) {
+        let leafColor = "#38bdf8";
+        if (category === 'writing') leafColor = "#c084fc";
+        if (category === 'experiment') leafColor = "#2dd4bf";
+        if (category === 'others') leafColor = "#fbbf24";
+
+        return `
+          <svg viewBox="0 0 100 100">
+            ${potSoil}
+            <path d="M50 83 Q50 64 50 56" stroke="#7e6ca8" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+            <path d="M50 64 Q36 52 34 58 Q43 66 50 64" fill="${leafColor}" filter="drop-shadow(0 0 5px ${leafColor})"/>
+            <path d="M50 60 Q64 48 66 54 Q57 62 50 60" fill="${leafColor}" filter="drop-shadow(0 0 5px ${leafColor})"/>
+            <circle cx="50" cy="54" r="2.8" fill="#ffffff" />
+          </svg>
+        `;
+      }
+
+      if (stepPercent < 100) {
+        if (category === 'reading') {
+          return `
+            <svg viewBox="0 0 100 100">
+              ${potSoil}
+              <path d="M50 83 Q50 52 50 40" stroke="#38bdf8" stroke-width="4" fill="none"/>
+              <polygon points="50,40 40,56 60,56" fill="#38bdf8" opacity="0.85"/>
+              <polygon points="50,26 36,44 64,44" fill="#7dd3fc" filter="drop-shadow(0 0 7px #38bdf8)"/>
+              <polygon points="30,62 50,68 28,74" fill="#0284c7" opacity="0.7"/>
+              <polygon points="70,62 50,68 72,74" fill="#0284c7" opacity="0.7"/>
+            </svg>
+          `;
+        } else if (category === 'writing') {
+          return `
+            <svg viewBox="0 0 100 100">
+              ${potSoil}
+              <path d="M50 83 Q32 60 52 42 Q65 30 50 22" stroke="#c084fc" stroke-width="4" fill="none"/>
+              <circle cx="34" cy="56" r="7.5" fill="#c084fc" opacity="0.9"/>
+              <circle cx="60" cy="34" r="8.5" fill="#e879f9" opacity="0.9"/>
+              <circle cx="50" cy="20" r="5.5" fill="#fde047" filter="drop-shadow(0 0 6px #fde047)"/>
+            </svg>
+          `;
+        } else if (category === 'experiment') {
+          return `
+            <svg viewBox="0 0 100 100">
+              ${potSoil}
+              <path d="M46 83 L46 48 Q50 42 54 48 L54 83 Z" fill="#94a3b8"/>
+              <path d="M24 48 Q50 24 76 48 Q50 43 24 48 Z" fill="#2dd4bf" filter="drop-shadow(0 0 8px #2dd4bf)"/>
+              <circle cx="42" cy="40" r="2.5" fill="#fff"/>
+              <circle cx="58" cy="38" r="2.8" fill="#fff"/>
+            </svg>
+          `;
+        } else {
+          return `
+            <svg viewBox="0 0 100 100">
+              ${potSoil}
+              <path d="M50 83 L50 38" stroke="#f59e0b" stroke-width="4" fill="none"/>
+              <path d="M50 61 Q26 55 32 70 Q44 70 50 61" fill="#10b981"/>
+              <path d="M50 51 Q74 45 68 60 Q56 60 50 51" fill="#10b981"/>
+              <circle cx="50" cy="36" r="11" fill="#f59e0b"/>
+              <circle cx="50" cy="36" r="7" fill="#fbbf24" filter="drop-shadow(0 0 7px #fbbf24)"/>
+            </svg>
+          `;
+        }
+      }
+
+      if (category === 'reading') {
+        return `
+          <svg viewBox="0 0 100 100">
+            ${potSoil}
+            <polygon points="50,10 40,48 60,48" fill="#e0f2fe" filter="drop-shadow(0 0 12px #38bdf8)"/>
+            <polygon points="32,26 21,62 42,52" fill="#7dd3fc" filter="drop-shadow(0 0 8px #0284c7)"/>
+            <polygon points="68,26 58,52 79,62" fill="#7dd3fc" filter="drop-shadow(0 0 8px #0284c7)"/>
+            <polygon points="50,38 30,78 70,78" fill="#0284c7" opacity="0.85"/>
+            <circle cx="23" cy="28" r="3" fill="#fff">
+              <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="77" cy="22" r="3.5" fill="#ffd15c">
+              <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+            </circle>
+          </svg>
+        `;
+      } else if (category === 'writing') {
+        return `
+          <svg viewBox="0 0 100 100">
+            ${potSoil}
+            <path d="M50 83 Q20 56 52 36 Q68 22 50 12" stroke="#c084fc" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+            <circle cx="50" cy="12" r="14" fill="#fde047" filter="drop-shadow(0 0 14px #facc15)"/>
+            <circle cx="50" cy="12" r="8.5" fill="#ffffff"/>
+            <circle cx="30" cy="44" r="9" fill="#e879f9" opacity="0.95"/>
+            <circle cx="68" cy="28" r="10" fill="#c084fc" opacity="0.95"/>
+          </svg>
+        `;
+      } else if (category === 'experiment') {
+        return `
+          <svg viewBox="0 0 100 100">
+            ${potSoil}
+            <path d="M45 83 L45 42 Q50 35 55 42 L55 83 Z" fill="#64748b"/>
+            <path d="M14 42 Q50 8 86 42 Q50 36 14 42 Z" fill="#2dd4bf" filter="drop-shadow(0 0 16px #2dd4bf)"/>
+            <path d="M22 41 Q50 31 78 41" stroke="#99f6e4" stroke-width="2.5" fill="none"/>
+            <circle cx="36" cy="28" r="3.2" fill="#ffffff"/>
+            <circle cx="64" cy="26" r="3.8" fill="#ffffff"/>
+            <circle cx="50" cy="18" r="2.5" fill="#ffd15c"/>
+          </svg>
+        `;
+      } else {
+        return `
+          <svg viewBox="0 0 100 100">
+            ${potSoil}
+            <path d="M50 83 L50 38" stroke="#10b981" stroke-width="5" fill="none"/>
+            <g filter="drop-shadow(0 0 14px #f59e0b)">
+              <circle cx="50" cy="34" r="21" fill="#f59e0b"/>
+              <circle cx="50" cy="34" r="15.5" fill="#fbbf24"/>
+              <circle cx="50" cy="34" r="10" fill="#b45309"/>
+              <circle cx="50" cy="34" r="5.5" fill="#fff">
+                <animate attributeName="r" values="4.5;6.5;4.5" dur="2s" repeatCount="indefinite"/>
+              </circle>
+            </g>
+          </svg>
+        `;
+      }
+    }
+
+    function getMascotSVG(avatar) {
+      const limbsAndBody = `
+        <ellipse cx="40" cy="90" rx="6" ry="4" fill="#cbd5e1" />
+        <ellipse cx="60" cy="90" rx="6" ry="4" fill="#cbd5e1" />
+        <ellipse cx="50" cy="74" rx="21" ry="17" fill="#f1f5f9" />
+        <circle cx="50" cy="72" r="6" fill="#38bdf8" opacity="0.6"/>
+        <ellipse cx="28" cy="72" rx="5" ry="7" fill="#cbd5e1" transform="rotate(20 28 72)" />
+        <ellipse cx="72" cy="72" rx="5" ry="7" fill="#cbd5e1" transform="rotate(-20 72 72)" />
+      `;
+
+      let headShape = '';
+      let faceFeatures = '';
+
+      if (avatar.animal === 'rabbit') {
+        headShape = `
+          <ellipse cx="37" cy="18" rx="6.5" ry="18" fill="#ffffff" />
+          <ellipse cx="37" cy="18" rx="3.5" ry="13" fill="#f472b6" />
+          <ellipse cx="63" cy="18" rx="6.5" ry="18" fill="#ffffff" />
+          <ellipse cx="63" cy="18" rx="3.5" ry="13" fill="#f472b6" />
+          <circle cx="50" cy="46" r="23" fill="#ffffff" />
+        `;
+        faceFeatures = `
+          <circle cx="42" cy="44" r="2.5" fill="#1e1b4b" />
+          <circle cx="58" cy="44" r="2.5" fill="#1e1b4b" />
+          <ellipse cx="36" cy="49" rx="3" ry="1.5" fill="#fbcfe8" />
+          <ellipse cx="64" cy="49" rx="3" ry="1.5" fill="#fbcfe8" />
+          <path d="M47 49 Q50 52 53 49" stroke="#1e1b4b" stroke-width="1.5" fill="none"/>
+        `;
+      } else if (avatar.animal === 'bear') {
+        headShape = `
+          <circle cx="31" cy="30" r="10" fill="#b45309" />
+          <circle cx="31" cy="30" r="6" fill="#fcd34d" />
+          <circle cx="69" cy="30" r="10" fill="#b45309" />
+          <circle cx="69" cy="30" r="6" fill="#fcd34d" />
+          <circle cx="50" cy="47" r="24" fill="#d97706" />
+        `;
+        faceFeatures = `
+          <circle cx="41" cy="45" r="3" fill="#1e1b4b" />
+          <circle cx="59" cy="45" r="3" fill="#1e1b4b" />
+          <ellipse cx="50" cy="52" rx="8" ry="6" fill="#fef3c7" />
+          <ellipse cx="50" cy="49" rx="3" ry="2" fill="#1e1b4b" />
+        `;
+      } else {
+        headShape = `
+          <polygon points="26,40 33,18 45,34" fill="#d97706" />
+          <polygon points="29,38 34,23 42,34" fill="#fde68a" />
+          <polygon points="74,40 67,18 55,34" fill="#d97706" />
+          <polygon points="71,38 66,23 58,34" fill="#fde68a" />
+          <circle cx="50" cy="47" r="23" fill="#d97706" />
+          <ellipse cx="50" cy="54" rx="17" ry="13" fill="#fef3c7" />
+        `;
+        faceFeatures = `
+          <circle cx="41" cy="39" r="2.5" fill="#fef3c7" />
+          <circle cx="59" cy="39" r="2.5" fill="#fef3c7" />
+          <circle cx="42" cy="45" r="2.8" fill="#1e1b4b" />
+          <circle cx="58" cy="45" r="2.8" fill="#1e1b4b" />
+          <ellipse cx="50" cy="50" rx="3.5" ry="2.5" fill="#1e1b4b" />
+          <path d="M46 54 Q50 57 54 54" stroke="#1e1b4b" stroke-width="1.5" fill="none"/>
+        `;
+      }
+
+      let hatSvg = '';
+      if (avatar.hat === 'star_antenna') {
+        hatSvg = `
+          <line x1="50" y1="24" x2="50" y2="8" stroke="#cbd5e1" stroke-width="2.5" />
+          <polygon points="50,1 53,7 59,7 54,11 56,17 50,13 44,17 46,11 41,7 47,7" fill="#ffd15c" filter="drop-shadow(0 0 5px #ffd15c)"/>
+        `;
+      } else if (avatar.hat === 'grad_cap') {
+        hatSvg = `
+          <polygon points="50,14 22,25 50,35 78,25" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.5"/>
+          <rect x="42" y="28" width="16" height="7" fill="#1e1b4b"/>
+          <line x1="50" y1="25" x2="74" y2="31" stroke="#fbbf24" stroke-width="1.5"/>
+          <circle cx="74" cy="32" r="2" fill="#fbbf24"/>
+        `;
+      }
+
+      let itemSvg = '';
+      if (avatar.item === 'watering_can') {
+        itemSvg = `
+          <g transform="translate(64, 56)">
+            <rect x="0" y="8" width="16" height="14" rx="3" fill="#38bdf8" />
+            <path d="M16 11 L24 6" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+            <path d="M0 10 Q-6 15 0 20" stroke="#bae6fd" stroke-width="2" fill="none"/>
+          </g>
+        `;
+      } else if (avatar.item === 'coffee') {
+        itemSvg = `
+          <g transform="translate(65, 54)">
+            <polygon points="2,6 14,6 12,22 4,22" fill="#451a03" stroke="#f8fafc" stroke-width="1"/>
+            <rect x="1" y="4" width="14" height="3" rx="1" fill="#cbd5e1" />
+            <line x1="8" y1="4" x2="11" y2="-2" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+          </g>
+        `;
+      } else if (avatar.item === 'bracelet') {
+        itemSvg = `
+          <g transform="translate(21, 68)">
+            <circle cx="7" cy="7" r="4.5" fill="#38bdf8" filter="drop-shadow(0 0 5px #9ef3ff)"/>
+            <ellipse cx="7" cy="7" rx="9" ry="3.5" fill="none" stroke="#ffd15c" stroke-width="1.5" transform="rotate(-25 7 7)"/>
+          </g>
+        `;
+      }
+
+      return `
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+          ${limbsAndBody}
+          ${headShape}
+          ${faceFeatures}
+          ${hatSvg}
+          ${itemSvg}
+        </svg>
+      `;
+    }
+
+    function getConstellationSVG(index, starCount) {
+      const config = CONSTELLATIONS[index] || CONSTELLATIONS[0];
+      const pts = config.points;
+      const effectiveCount = Math.min(starCount, 3);
+      const isCompleted = starCount >= 3;
+
+      let pointsSvg = pts.map((p, idx) => {
+        const isLit = idx < effectiveCount || isCompleted;
+        const color = isLit ? "#ffd15c" : "rgba(255, 255, 255, 0.2)";
+        const glow = isLit ? `filter="drop-shadow(0 0 5px #ffd15c)"` : "";
+        const r = isLit ? "5" : "3.2";
+        return `<circle cx="${p[0]}%" cy="${p[1]}%" r="${r}" fill="${color}" ${glow} />`;
+      }).join('');
+
+      let linesSvg = config.lines.map(([i1, i2]) => {
+        const isConnected = isCompleted || ((i1 < effectiveCount) && (i2 < effectiveCount));
+        const strokeColor = isConnected ? "rgba(255, 209, 92, 0.95)" : "rgba(255, 255, 255, 0.12)";
+        const strokeWidth = isConnected ? "2.5" : "1";
+        const strokeDash = isConnected ? "none" : "2,2";
+        const p1 = pts[i1];
+        const p2 = pts[i2];
+        return `<line x1="${p1[0]}%" y1="${p1[1]}%" x2="${p2[0]}%" y2="${p2[1]}%" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-dasharray="${strokeDash}" />`;
+      }).join('');
+
+      return `
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+          ${linesSvg}
+          ${pointsSvg}
+        </svg>
+      `;
+    }
+
+    /* ==========================================================================
+       4. Web Audio API：輕快抒情八音盒音樂
+       ========================================================================== */
+    class CosmicMusicPlayer {
+      constructor() {
+        this.ctx = null;
+        this.isPlaying = false;
+        this.timer = null;
+        this.step = 0;
+        
+        this.freqMap = {
+          'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
+          'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99, 'A5': 880.00, 'B5': 987.77,
+          'C6': 1046.50
+        };
+
+        this.score = [
+          'E5', 'G5', 'C6', 'B5',  'G5', 'E5', 'D5', 'G4',
+          'C5', 'E5', 'G5', 'A5',  'G5', 'E5', 'D5', null,
+          'E5', 'G5', 'C6', 'D6',  'C6', 'G5', 'E5', 'G5',
+          'A5', 'G5', 'E5', 'D5',  'C5', null, 'C5', null,
+          'A5', 'C6', 'E6', 'D6',  'B5', 'G5', 'D5', 'G5',
+          'A5', 'G5', 'F5', 'E5',  'D5', 'F5', 'A5', 'G5',
+          'C5', 'E5', 'G5', 'C6',  'B5', 'G5', 'A5', 'F5',
+          'E5', 'D5', 'C5', 'D5',  'C5', null, null, null
+        ];
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+        }
+      }
+
+      playPluck(noteName) {
+        if (!this.ctx || !noteName || !this.freqMap[noteName]) return;
+        const freq = this.freqMap[noteName];
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+        gain.gain.setValueAtTime(0, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.09, this.ctx.currentTime + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 1.4);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start();
+        osc.stop(this.ctx.currentTime + 1.45);
+      }
+
+      toggle() {
+        this.init();
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+
+        if (this.isPlaying) {
+          clearInterval(this.timer);
+          this.isPlaying = false;
+        } else {
+          this.isPlaying = true;
+          this.timer = setInterval(() => {
+            const note = this.score[this.step % this.score.length];
+            this.playPluck(note);
+            this.step++;
+          }, 320);
+        }
+        return this.isPlaying;
+      }
+    }
+
+    const musicPlayer = new CosmicMusicPlayer();
+
+    /* ==========================================================================
+       5. 畫面渲染主函式 (Render Function)
+       ========================================================================== */
+    function render() {
+      document.getElementById('headerStardust').innerText = state.stardust;
+      
+      const starText = state.todayStarCount >= 3 
+        ? `⭐ 今日星光: 3/3 (已點亮 · 累計 ${state.todayStarCount} 步)` 
+        : `⭐ 今日星光: ${state.todayStarCount}/3 (累計 ${state.todayStarCount} 步)`;
+      document.getElementById('headerStarStatus').innerText = starText;
+
+      document.getElementById('todayCompletedCountText').innerText = state.todayCompletedCount;
+
+      const currentConstellation = CONSTELLATIONS[state.activeConstellationIndex] || CONSTELLATIONS[0];
+      document.getElementById('constellationTitle').innerText = `${currentConstellation.name}`;
+      document.getElementById('constellationSvgContainer').innerHTML = getConstellationSVG(state.activeConstellationIndex, state.todayStarCount);
+
+      const activeSlotsCount = state.slots.filter(s => s !== null).length;
+      document.getElementById('taskCounterText').innerText = `${activeSlotsCount}/6 進行中`;
+      
+      const btnCreate = document.getElementById('btnCreateTask');
+      if (activeSlotsCount >= 6) {
+        btnCreate.disabled = true;
+        btnCreate.innerText = "植物艙已滿 (6/6)";
+      } else {
+        btnCreate.disabled = false;
+        btnCreate.innerText = "＋ 建立新研究任務";
+      }
+
+      // 渲染任務清單
+      const taskListEl = document.getElementById('taskListContainer');
+      taskListEl.innerHTML = '';
+
+      if (activeSlotsCount === 0) {
+        taskListEl.innerHTML = `
+          <div style="text-align: center; color: var(--text-sub); padding: 25px 10px; font-size: 0.88rem;">
+            目前沒有進行中的任務喔！<br>點擊上方按鈕種下第一顆研究種子吧 🌱
+          </div>
+        `;
+      } else {
+        state.slots.forEach((task, slotIndex) => {
+          if (!task) return;
+          const percent = Math.round((task.currentStep / task.maxSteps) * 100);
+          const isMature = task.currentStep >= task.maxSteps;
+
+          const card = document.createElement('div');
+          card.className = 'task-card';
+          card.innerHTML = `
+            <div class="task-meta">
+              <span class="task-slot-tag">槽位 ${slotIndex + 1}</span>
+              <span class="task-category-tag cat-${task.category}">${getCategoryLabel(task.category)}</span>
+            </div>
+            <div class="task-title">${escapeHtml(task.title)}</div>
+            <div class="task-progress-box">
+              <div class="task-progress-info">
+                <span>進度 ${task.currentStep}/${task.maxSteps} 次</span>
+                <span>${percent}%</span>
+              </div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill ${isMature ? 'mature' : ''}" style="width: ${percent}%;"></div>
+              </div>
+            </div>
+            <div class="task-controls">
+              <button class="btn-delete-task" title="放棄任務" onclick="handleDeleteTask(${slotIndex})">🗑️ 放棄</button>
+              ${isMature ? `
+                <button class="btn-harvest-task" onclick="handleHarvest(${slotIndex})">🌸 採收星塵 (+15)</button>
+              ` : `
+                <button class="btn-step" onclick="handleStepTask(${slotIndex})">🌱 澆灌/推進</button>
+              `}
+            </div>
+          `;
+          taskListEl.appendChild(card);
+        });
+      }
+
+      // 渲染溫室六格
+      const gridEl = document.getElementById('greenhouseGrid');
+      gridEl.innerHTML = '';
+
+      state.slots.forEach((task, index) => {
+        const slotDiv = document.createElement('div');
+        slotDiv.className = 'plant-slot';
+        slotDiv.id = `slot-${index}`;
+
+        if (!task) {
+          slotDiv.classList.add('empty');
+          slotDiv.innerHTML = `
+            <div class="slot-index">槽位 ${index + 1}</div>
+            <div class="slot-display-stage">
+              <div class="empty-soil-svg">${getEmptyDishSVG()}</div>
+            </div>
+            <div class="slot-info-box">
+              <div class="slot-title" style="color: var(--text-sub);">空培養皿</div>
+              <div class="slot-progress-text">點擊播種新任務</div>
+            </div>
+          `;
+          slotDiv.onclick = () => openCreateTaskModal(index);
+        } else {
+          const percent = Math.round((task.currentStep / task.maxSteps) * 100);
+          const isMature = percent >= 100;
+          if (isMature) slotDiv.classList.add('mature');
+
+          let stageText = "✨ 種子";
+          if (percent >= 100) stageText = "🌸 盛開";
+          else if (percent >= 50) stageText = "🌿 成長";
+          else if (percent > 0) stageText = "🌱 幼苗";
+
+          slotDiv.innerHTML = `
+            <div class="slot-index">槽位 ${index + 1}</div>
+            <div class="slot-stage-tag cat-${task.category}">${stageText}</div>
+            <div class="slot-display-stage">
+              <div class="plant-svg-container" id="plantContainer-${index}">
+                ${getPlantSVG(task.category, percent)}
+              </div>
+            </div>
+            <div class="slot-info-box">
+              <div class="slot-title">${escapeHtml(task.title)}</div>
+              <div class="slot-progress-text">${task.currentStep}/${task.maxSteps} (${percent}%)</div>
+            </div>
+          `;
+
+          slotDiv.onclick = () => {
+            if (isMature) {
+              handleHarvest(index);
+            } else {
+              triggerShake(index);
+              showMascotSpeech("這株植物還在努力光合作用中，再完成一點進度吧！");
+            }
+          };
+        }
+
+        gridEl.appendChild(slotDiv);
+      });
+
+      document.getElementById('mascotSvgWrap').innerHTML = getMascotSVG(state.avatar);
+    }
+
+    function getCategoryLabel(cat) {
+      switch(cat) {
+        case 'reading': return '文獻閱讀';
+        case 'writing': return '論文寫作';
+        case 'experiment': return '研究實驗';
+        default: return '其他事項';
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+
+    /* ==========================================================================
+       6. 互動操作邏輯
+       ========================================================================== */
+    let targetSlotForCreation = null;
+
+    function openCreateTaskModal(slotIdx = null) {
+      const activeCount = state.slots.filter(s => s !== null).length;
+      if (activeCount >= 6) {
+        showMascotSpeech("植物艙已經滿了喔 (6/6)！請先採收或放棄任務再來播種～");
+        return;
+      }
+      targetSlotForCreation = slotIdx;
+      document.getElementById('inputTaskTitle').value = '';
+      document.getElementById('titleErrorTip').style.display = 'none';
+      document.getElementById('inputTaskTitle').classList.remove('error');
+      document.getElementById('inputTaskSteps').value = 2;
+      document.getElementById('stepCountDisplay').innerText = 2;
+      openModal('modalCreateTask');
+    }
+
+    document.getElementById('formCreateTask').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const titleInput = document.getElementById('inputTaskTitle');
+      const title = titleInput.value.trim();
+
+      if (!title) {
+        titleInput.classList.add('error');
+        document.getElementById('titleErrorTip').style.display = 'block';
+        return;
+      }
+
+      let slotIndex = targetSlotForCreation;
+      if (slotIndex === null || state.slots[slotIndex] !== null) {
+        slotIndex = state.slots.findIndex(s => s === null);
+      }
+
+      if (slotIndex === -1) {
+        alert("植物艙已滿！");
+        return;
+      }
+
+      const category = document.querySelector('input[name="taskCategory"]:checked').value;
+      const maxSteps = parseInt(document.getElementById('inputTaskSteps').value, 10);
+
+      state.slots[slotIndex] = {
+        id: "task_" + Date.now(),
+        title: title,
+        category: category,
+        currentStep: 0,
+        maxSteps: maxSteps
+      };
+
+      closeModal('modalCreateTask');
+      showMascotSpeech("新種子已經安穩種下囉！祝你今天研究順利～✨");
+      saveState();
+    });
+
+    function handleStepTask(slotIndex) {
+      const task = state.slots[slotIndex];
+      if (!task) return;
+
+      if (task.currentStep < task.maxSteps) {
+        task.currentStep += 1;
+        state.todayStarCount += 1;
+
+        if (state.todayStarCount === 3) {
+          showMascotSpeech("今日星圖完成！你今天又點亮了一小片宇宙！🌌");
+        } else {
+          const quote = ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)];
+          showMascotSpeech(quote);
+        }
+
+        saveState();
+      }
+    }
+
+    function handleHarvest(slotIndex) {
+      const task = state.slots[slotIndex];
+      if (!task || task.currentStep < task.maxSteps) return;
+
+      createHarvestPopParticles(slotIndex);
+
+      state.stardust += 15;
+      state.todayCompletedCount += 1;
+      state.storageArchive[task.category] = (state.storageArchive[task.category] || 0) + 1;
+      
+      state.slots[slotIndex] = null;
+      showMascotSpeech("恭喜完成並採收！獲得 15 點星塵，已存入太空倉儲 ✨");
+      saveState();
+    }
+
+    function handleDeleteTask(slotIndex) {
+      const ok = confirm("確定要放棄這項任務嗎？種子將會化作星塵飄散喔！");
+      if (ok) {
+        launchDeepSpaceDust(slotIndex);
+        showMascotSpeech("種子化為星塵，向外太空深處飄散而去…適時調整步伐再出發！✨");
+        
+        setTimeout(() => {
+          state.slots[slotIndex] = null;
+          saveState();
+        }, 300);
+      }
+    }
+
+    function triggerShake(slotIndex) {
+      const el = document.getElementById(`slot-${slotIndex}`);
+      if (el) {
+        el.classList.add('shake');
+        setTimeout(() => el.classList.remove('shake'), 400);
+      }
+    }
+
+    function launchDeepSpaceDust(slotIndex) {
+      const slotEl = document.getElementById(`slot-${slotIndex}`);
+      if (!slotEl) return;
+
+      const rect = slotEl.getBoundingClientRect();
+      const originX = rect.left + rect.width / 2;
+      const originY = rect.top + rect.height / 2;
+
+      const colors = ['#ffd15c', '#9ef3ff', '#f472b6', '#c084fc', '#ffffff', '#5eead4'];
+
+      for (let i = 0; i < 28; i++) {
+        const dust = document.createElement('div');
+        dust.className = 'space-flying-dust';
+
+        const size = Math.random() * 9 + 4;
+        dust.style.width = `${size}px`;
+        dust.style.height = `${size}px`;
+        dust.style.left = `${originX}px`;
+        dust.style.top = `${originY}px`;
+
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        dust.style.background = color;
+        dust.style.boxShadow = `0 0 12px ${color}, 0 0 20px ${color}`;
+
+        const dx = (Math.random() - 0.5) * 400 + 'px';
+        const dy = -(Math.random() * 450 + 350) + 'px';
+        const rot = (Math.random() - 0.5) * 720 + 'deg';
+        const dur = (Math.random() * 0.6 + 1.1) + 's';
+
+        dust.style.setProperty('--dx', dx);
+        dust.style.setProperty('--dy', dy);
+        dust.style.setProperty('--rot', rot);
+        dust.style.setProperty('--duration', dur);
+
+        document.body.appendChild(dust);
+
+        setTimeout(() => dust.remove(), 1800);
+      }
+    }
+
+    function createHarvestPopParticles(slotIndex) {
+      const slotEl = document.getElementById(`slot-${slotIndex}`);
+      if (!slotEl) return;
+
+      const colors = ['#ffd15c', '#9ef3ff', '#f472b6'];
+      for (let i = 0; i < 14; i++) {
+        const p = document.createElement('div');
+        p.className = 'harvest-particle';
+        const size = Math.random() * 8 + 5;
+        p.style.width = `${size}px`;
+        p.style.height = `${size}px`;
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        p.style.background = c;
+        p.style.boxShadow = `0 0 10px ${c}`;
+
+        const dx = (Math.random() - 0.5) * 140 + 'px';
+        const dy = -(Math.random() * 100 + 40) + 'px';
+        p.style.setProperty('--dx', dx);
+        p.style.setProperty('--dy', dy);
+
+        p.style.left = '50%';
+        p.style.top = '50%';
+        slotEl.appendChild(p);
+
+        setTimeout(() => p.remove(), 850);
+      }
+    }
+
+    /* ==========================================================================
+       7. 衣櫥、倉儲與設定模組
+       ========================================================================== */
+    const WARDROBE_DATA = {
+      animal: [
+        { id: "animal_rabbit", type: "animal", key: "rabbit", name: "兔兔太空員 🐰", price: 0 },
+        { id: "animal_bear", type: "animal", key: "bear", name: "熊熊太空員 🐻", price: 0 },
+        { id: "animal_dog", type: "animal", key: "dog", name: "柴犬太空員 🐶", price: 0 }
+      ],
+      hat: [
+        { id: "hat_none", type: "hat", key: "none", name: "無頭飾", price: 0 },
+        { id: "hat_star_antenna", type: "hat", key: "star_antenna", name: "星星天線", price: 20 },
+        { id: "hat_grad_cap", type: "hat", key: "grad_cap", name: "小博士帽", price: 30 }
+      ],
+      item: [
+        { id: "item_none", type: "item", key: "none", name: "無配件", price: 0 },
+        { id: "item_bracelet", type: "item", key: "bracelet", name: "行星手環 🪐", price: 20 },
+        { id: "item_watering_can", type: "item", key: "watering_can", name: "星塵噴壺", price: 20 },
+        { id: "item_coffee", type: "item", key: "coffee", name: "太空冰美式", price: 30 }
+      ]
+    };
+
+    let activeWardrobeTab = 'animal';
+
+    function renderWardrobe() {
+      const container = document.getElementById('wardrobeItemsContainer');
+      container.innerHTML = '';
+      const items = WARDROBE_DATA[activeWardrobeTab] || [];
+
+      items.forEach(item => {
+        const isUnlocked = item.price === 0 || state.unlockedItems.includes(item.id);
+        const isEquipped = state.avatar[item.type] === item.key;
+
+        const card = document.createElement('div');
+        card.className = `item-card ${isEquipped ? 'equipped' : ''}`;
+        
+        let actionBtnHtml = '';
+        if (activeWardrobeTab === 'animal') {
+          if (isEquipped) {
+            actionBtnHtml = `<button class="item-card-btn" disabled style="background: var(--accent-green); color:#000; font-weight:600;">已選擇</button>`;
+          } else {
+            actionBtnHtml = `<button class="item-card-btn" onclick="equipWardrobeItem('${item.type}', '${item.key}')">選擇</button>`;
+          }
+        } else {
+          if (isEquipped) {
+            actionBtnHtml = `<button class="item-card-btn" disabled style="background: var(--accent-green); color:#000; font-weight:600;">已穿戴</button>`;
+          } else if (isUnlocked) {
+            actionBtnHtml = `<button class="item-card-btn" onclick="equipWardrobeItem('${item.type}', '${item.key}')">穿戴</button>`;
+          } else {
+            actionBtnHtml = `<button class="item-card-btn buy-btn" id="buy-btn-${item.id}" onclick="buyWardrobeItem('${item.id}', ${item.price})">🔒 ${item.price} 星塵</button>`;
+          }
+        }
+
+        card.innerHTML = `
+          <div class="item-card-title">${item.name}</div>
+          ${actionBtnHtml}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function buyWardrobeItem(itemId, price) {
+      if (state.stardust < price) {
+        const btn = document.getElementById(`buy-btn-${itemId}`);
+        if (btn) {
+          btn.classList.add('shake');
+          setTimeout(() => btn.classList.remove('shake'), 400);
+        }
+        showMascotSpeech(`星塵不足（需要 ${price} 星塵，目前只有 ${state.stardust}）！無法購買喔 ✨`);
+        return;
+      }
+      state.stardust -= price;
+      state.unlockedItems.push(itemId);
+      saveState();
+      renderWardrobe();
+      showMascotSpeech("成功兌換新裝扮！快換上試試看吧～💖");
+    }
+
+    function equipWardrobeItem(type, key) {
+      state.avatar[type] = key;
+      saveState();
+      renderWardrobe();
+      showMascotSpeech("新外觀換好囉！超好看 ✨");
+    }
+
+    function renderArchive() {
+      const grid = document.getElementById('archiveContentGrid');
+      const arch = state.storageArchive || {};
+      
+      const plants = [
+        { name: "水晶星葉草", count: arch.reading || 0, cat: "reading" },
+        { name: "墨夜月光蔓", count: arch.writing || 0, cat: "writing" },
+        { name: "脈衝星雲蕈", count: arch.experiment || 0, cat: "experiment" },
+        { name: "太陽耀斑葵", count: arch.others || 0, cat: "others" }
+      ];
+
+      grid.innerHTML = plants.map(p => `
+        <div class="archive-card">
+          <div class="archive-plant-icon">
+            ${getPlantSVG(p.cat, 100)}
+          </div>
+          <div class="archive-info-box">
+            <div class="archive-name">${p.name}</div>
+            <div class="archive-count">× ${p.count}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* ==========================================================================
+       8. 模態視窗與 UI 事件監聽
+       ========================================================================== */
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        closeModal(btn.getAttribute('data-close'));
+      });
+    });
+
+    document.querySelectorAll('.modal-backdrop').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+      });
+    });
+
+    document.getElementById('btnCreateTask').addEventListener('click', () => openCreateTaskModal());
+    document.getElementById('inputTaskSteps').addEventListener('input', (e) => {
+      document.getElementById('stepCountDisplay').innerText = e.target.value;
+    });
+
+    document.getElementById('btnSwitchConstellation').addEventListener('click', () => {
+      state.activeConstellationIndex = (state.activeConstellationIndex + 1) % CONSTELLATIONS.length;
+      saveState();
+      const nextName = CONSTELLATIONS[state.activeConstellationIndex].name;
+      showMascotSpeech(`星圖已切換為「${nextName}」！✨`);
+    });
+
+    const btnMusic = document.getElementById('btnToggleBgm');
+    btnMusic.addEventListener('click', () => {
+      const playing = musicPlayer.toggle();
+      if (playing) {
+        btnMusic.innerText = "🎵 音樂: 開";
+        btnMusic.classList.add('active');
+        showMascotSpeech("星空八音盒已響起，放鬆心情一起前進吧 🎶");
+      } else {
+        btnMusic.innerText = "🎵 音樂: 關";
+        btnMusic.classList.remove('active');
+      }
+    });
+
+    document.getElementById('btnOpenArchive').addEventListener('click', () => {
+      renderArchive();
+      openModal('modalArchive');
+    });
+
+    document.getElementById('btnOpenWardrobe').addEventListener('click', () => {
+      renderWardrobe();
+      openModal('modalWardrobe');
+    });
+
+    document.querySelectorAll('.wardrobe-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.wardrobe-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeWardrobeTab = btn.getAttribute('data-tab');
+        renderWardrobe();
+      });
+    });
+
+    document.getElementById('btnOpenSettings').addEventListener('click', () => openModal('modalSettings'));
+
+    document.getElementById('btnResetAllData').addEventListener('click', () => {
+      const ok = confirm("確定要重設花園嗎？所有星塵、植物與倉儲紀錄都將被清除！");
+      if (ok) {
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      }
+    });
+
+    let bubbleTimeout = null;
+    function showMascotSpeech(text) {
+      const bubble = document.getElementById('mascotBubble');
+      bubble.innerText = text;
+      if (bubbleTimeout) clearTimeout(bubbleTimeout);
+      bubbleTimeout = setTimeout(() => {
+        bubble.innerText = "今天也前進了一小步，休息一下喝口水吧！🌱";
+      }, 6000);
+    }
+
+    document.getElementById('mascotSvgWrap').addEventListener('click', () => {
+      const quote = ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)];
+      showMascotSpeech(quote);
+    });
+    document.getElementById('mascotBubble').addEventListener('click', () => {
+      const quote = ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)];
+      showMascotSpeech(quote);
+    });
+
+    render();
+  </script>
+</body>
+</html>
